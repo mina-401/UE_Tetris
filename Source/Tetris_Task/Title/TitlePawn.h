@@ -26,6 +26,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void CreateBlocks(int _X, int _Y);
+
+	void Render();
+	void Clear();
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
@@ -46,6 +50,10 @@ public:
 		// 랜덤 인덱스를 EBlockType으로 변환하여 반환
 		return static_cast<EBlockType>(randomIndex);
 	}
+
+	TArray<TArray<int>> GetBlockShape(EBlockType Shape);
+	bool IsValidPosition(const TArray<TArray<int32>>& Shape, int OffsetX, int OffsetY, const TArray<TArray<int>>& Board);
+	void MoveBlock(FVector2D MoveAxisVector);
 	void SetMapOutliner();
 
 	void SpawnTetrisBlock();
@@ -59,6 +67,10 @@ public:
 	UPROPERTY()
 	class ALevelActor* LevelPlane = nullptr;
 
+	TArray<TArray<int>> TBlocks;
+
+
+	// Class
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ALevelActor> LevelFactory;
 	//void Setup()
@@ -91,7 +103,6 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ABlock> ZFactory;
-
 
 	UPROPERTY()
 	class ATitleScreen* TS = nullptr;

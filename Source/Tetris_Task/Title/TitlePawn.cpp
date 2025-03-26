@@ -16,6 +16,108 @@ ATitlePawn::ATitlePawn()
 	PrimaryActorTick.bCanEverTick = true;
 
 }
+TArray<TArray<int>> ATitlePawn::GetBlockShape(EBlockType Shape)
+{
+    switch (Shape)
+    {
+    case EBlockType::BT_I:
+        return { {1, 1, 1, 1} };
+        break;
+    case EBlockType::BT_L:
+        return { {0, 0, 1}, {1, 1, 1} };
+        break;
+    case EBlockType::BT_J:
+        return { {1, 0, 0}, {1, 1, 1} };
+        break;
+    case EBlockType::BT_Z:
+        return { {1, 1, 0}, {0, 1, 1} };
+        break;
+    case EBlockType::BT_S:
+        return { {0, 1, 1}, {1, 1, 0} };
+        break;
+    case EBlockType::BT_T:
+        return { {0, 1, 0}, {1, 1, 1} };
+        break;
+    case EBlockType::BT_O:
+        return { {1, 1}, {1, 1} };
+        break;
+    default:
+        break;
+    }
+    return { {1,1,1,1} };
+}
+bool ATitlePawn::IsValidPosition(const TArray<TArray<int32>>& Shape, int OffsetX, int OffsetY, const TArray<TArray<int>>& Board)
+{
+    for (int y = 0; y < Shape.Num(); ++y)
+    {
+        for (int x = 0; x < Shape[y].Num(); ++x)
+        {
+            if (Shape[y][x] != 0) // 블록의 부분인 경우
+            {
+                int NewX = OffsetX + x;
+                int NewY = OffsetY + y;
+
+                // 경계 검사
+                if (NewX < 0 || NewX >= Board[0].Num() || NewY >= Board.Num())
+                {
+                    return false;
+                }
+
+                // 블록 충돌 검사
+                if (NewY >= 0 && Board[NewY][NewX] != 0)
+                {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+void ATitlePawn::MoveBlock(FVector2D MoveAxisVector)
+{
+
+        int x = Block->X;
+        int y = Block->Y;
+
+        TArray<TArray<int>> CurrentShape = GetBlockShape(BlockType);
+
+        if (Controller != nullptr)
+        {
+            if (MoveAxisVector.Y >= 1) // 오른쪽 이동
+            {
+                if (IsValidPosition(CurrentShape, x + 1, y, TBlocks))
+                {
+                    Block->X += 1;
+                }
+            }
+            else if (MoveAxisVector.Y <= -1) // 왼쪽 이동
+            {
+                if (IsValidPosition(CurrentShape, x - 1, y, TBlocks))
+                {
+                    Block->X -= 1;
+                }
+            }
+
+            if (MoveAxisVector.X >= 1) // 아래로 이동
+            {
+                if (IsValidPosition(CurrentShape, x, y + 1, TBlocks))
+                {
+                    Block->Y += 1;
+                }
+            }
+            else if (MoveAxisVector.X <= -1) // 위로 이동
+            {
+                if (IsValidPosition(CurrentShape, x, y - 1, TBlocks))
+                {
+                    Block->Y -= 1;
+                }
+            }
+
+            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("%f %f Move"), MoveAxisVector.X, MoveAxisVector.Y));
+        }
+
+}
+
 void ATitlePawn::SetMapOutliner()
 {
     FVector Location = { 0.0, 0.0, 0.0 };
@@ -80,7 +182,7 @@ void ATitlePawn::SpawnTetrisBlock()
 
 
     Block->X = 0;
-    Block->Y = Y;
+    Block->Y = Y-1;
 
 }
 // Called when the game starts or when spawned
@@ -90,7 +192,7 @@ void ATitlePawn::BeginPlay()
 
     SetMapOutliner();
     SpawnTetrisBlock();
-
+    CreateBlocks(X, Y);
 
 }
 
@@ -98,6 +200,44 @@ void ATitlePawn::BeginPlay()
 void ATitlePawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+    int x = Block->X;
+    int y = Block->Y;
+
+
+    
+
+    if (y == 0)
+    {
+        TBlocks[y][x] =1;
+    }
+    else if (TBlocks[y - 1][x]== 1)
+    {
+        TBlocks[y][x] = 1;
+    }
+    if (TBlocks[y][x] == 1)
+    {
+        SpawnTetrisBlock();
+    }
+}
+
+void ATitlePawn::CreateBlocks(int _X, int _Y)
+{
+    TBlocks.SetNum(_Y);
+    for (int y = 0; y < _Y; y++)
+    {
+
+        TBlocks[y].SetNum(_X);
+
+        for (int x = 0; x < _X; x++)
+        {
+            TBlocks[y][x] = 0;
+        }
+    }
+}
+void ATitlePawn::Clear()
+{
+    TBlocks.Empty();
 }
 
 
@@ -123,59 +263,58 @@ void ATitlePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
             {
                 FVector2D MoveAxisVector = _Value.Get<FVector2D>();
 
-                if (Controller != nullptr)
-                {
-                    float Right = MoveAxisVector.Y;
-                    float Up = MoveAxisVector.X;
 
+               //MoveBlock(MoveAxisVector);
+               if (Controller != nullptr)
+               {
 
-                    int x = Block->X;
-                    int y = Block->Y;
+                   int x = Block->X;
+                   int y = Block->Y;
 
-                    if (Right >= 1)
-                    {
-                        int NextX = x + 1;
-                        if (NextX > X - 1)
-                        {
-                            return;
-                        }
-                        Block->X = NextX;
+                   if (MoveAxisVector.Y >= 1)
+                   {
+                       int NextX = x + 1;
+                       if (NextX > X - 1)
+                       {
+                           return;
+                       }
+                       Block->X = NextX;
 
-                    }
-                    else if (Right <= -1)
-                    {
-                        int NextX = x - 1;
+                   }
+                   else if (MoveAxisVector.Y <= -1)
+                   {
+                       int NextX = x - 1;
 
-                        if (NextX < 0)
-                        {
-                            return;
-                        }
-                        Block->X = NextX;
-                    }
+                       if (NextX < 0)
+                       {
+                           return;
+                       }
+                       Block->X = NextX;
+                   }
 
-                    else if (Up <= -1)
-                    {
-                        int NextY = y - 1;
-                        if (NextY < 0)
-                        {
-                            return;
-                        }
-                        Block->Y = NextY;
-                    }
+                   else if (MoveAxisVector.X <= -1)
+                   {
+                       int NextY = y - 1;
+                       if (NextY < 0)
+                       {
+                           return;
+                       }
+                       Block->Y = NextY;
+                   }
 
-                    else if (Up >= 1)
-                    {
-                        int NextY = y + 1;
-                        if (NextY > Y-1)
-                        {
-                            return;
-                        }
-                        Block->Y = NextY;
-                    }
+                /*   else if (MoveAxisVector.X >= 1)
+                   {
+                       int NextY = y + 1;
+                       if (NextY > Y-1)
+                       {
+                           return;
+                       }
+                       Block->Y = NextY;
+                   }*/
 
-                    // GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("%f Right"), Right));
-                    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("%f %f Move"), MoveAxisVector.X, MoveAxisVector.Y));
-                }
+                   // GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("%f Right"), Right));
+                   GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("%f %f Move"), MoveAxisVector.X, MoveAxisVector.Y));
+               }
 
                 IsbMoving = false;
             }
