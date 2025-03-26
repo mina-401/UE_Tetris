@@ -302,18 +302,6 @@ void ATitlePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
                        Block->Y = NextY;
                    }
 
-                /*   else if (MoveAxisVector.X >= 1)
-                   {
-                       int NextY = y + 1;
-                       if (NextY > Y-1)
-                       {
-                           return;
-                       }
-                       Block->Y = NextY;
-                   }*/
-
-                   // GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("%f Right"), Right));
-                   GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("%f %f Move"), MoveAxisVector.X, MoveAxisVector.Y));
                }
 
                 IsbMoving = false;
