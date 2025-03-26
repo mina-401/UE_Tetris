@@ -29,7 +29,7 @@ public:
 
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Blocks")
-	TArray<TArray<ABlock*>> Blocks;
+	TArray<class ABlock*> Blocks;
 	TArray<TArray<ETBlock>> TBlocks;
 
 	UPROPERTY(EditAnywhere, Category = "Tetris")
@@ -46,5 +46,24 @@ public:
 	void Render();
 	void Clear();
 	
+	TArray<class ABlock*> GetAllBlocks()
+	{
+		return Blocks;
+	}
 
+	TArray<TArray<ETBlock>> GetAllTBlocks()
+	{
+		return TBlocks;
+	}
+
+
+	//UFUNCTION()
+	//void SetBlockX(int _X)
+	//{
+	//	block->X = _X;
+	//}
+	//void SetBlockY(int _Y)
+	//{
+	//	block->Y = _Y;
+	//}
 };

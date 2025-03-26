@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include <Global/TEnum.h>
+
 #include "TitlePawn.generated.h"
 
 UCLASS()
@@ -15,6 +17,7 @@ public:
 	// Sets default values for this pawn's properties
 	ATitlePawn();
 
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -25,15 +28,88 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
+	
+	void CheckBlock();
+
+	EBlockType GetRandomBlockType()
+	{
+		// EBlockType의 총 개수
+		int BlockTypeCount = 7; // BT_I부터 BT_O까지 총 7개
+
+		// 랜덤 시드 초기화
+		std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
+		// 0부터 BlockTypeCount - 1 사이의 랜덤 인덱스 생성
+		int randomIndex = std::rand() % BlockTypeCount;
+
+		// 랜덤 인덱스를 EBlockType으로 변환하여 반환
+		return static_cast<EBlockType>(randomIndex);
+	}
+	void SetMapOutliner();
+
+	void SpawnTetrisBlock();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map")
+	int MapHeight = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map")
+	int MapWidth = 0;
+
+	UPROPERTY()
+	class ALevelActor* LevelPlane = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ALevelActor> LevelFactory;
+	//void Setup()
+
+
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ATitleScreen> TSFactory;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ABlock> BlockFactory;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ABlock> JFactory;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ABlock> IFactory;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ABlock> LFactory;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ABlock> OFactory;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ABlock> SFactory;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ABlock> TFactory;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ABlock> ZFactory;
+
+
 	UPROPERTY()
 	class ATitleScreen* TS = nullptr;
+
+	UPROPERTY()
+	class ABlock* Block = nullptr;
+
+	EBlockType BlockType = EBlockType::BT_I;
+
+
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	class UInputAction* MoveAction = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	class UInputAction* RoatateAction = nullptr;
+
+	int X = MapHeight;
+	int Y = MapWidth;
 	
 };

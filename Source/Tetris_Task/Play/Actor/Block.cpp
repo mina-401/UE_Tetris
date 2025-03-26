@@ -26,6 +26,8 @@ ABlock::ABlock()
 void ABlock::BeginPlay()
 {
 	Super::BeginPlay();
+
+
 	
 }
 
